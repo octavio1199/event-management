@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -23,3 +23,10 @@ class RegistrationViewSet(viewsets.ModelViewSet):
     queryset = Registration.objects.all()
     serializer_class = RegistrationSerializer
     http_method_names = ['get', 'post', 'delete']
+
+    @action(detail=True, methods=['post'])
+    def confirm(self, request, pk=None):
+        registration = self.get_object()
+        registration.confirmed = True
+        registration.save()
+        return Response({'status': 'registration confirmed'}, status=status.HTTP_200_OK)

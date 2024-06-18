@@ -1,4 +1,5 @@
 from django.test import TestCase
+from rest_framework import request
 
 # Crie um evento para teste no shell do Django
 from events.models import Event
