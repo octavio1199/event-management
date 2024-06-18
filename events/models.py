@@ -16,7 +16,7 @@ class Event(models.Model):
     time = models.TimeField()
     location = models.CharField(max_length=255)
     active = models.BooleanField(default=True)
-    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    organizer = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     participants = models.ManyToManyField(CustomUser, through='Registration', related_name='events')
 
     def deactivate(self, *args, **kwargs):
