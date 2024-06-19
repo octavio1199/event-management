@@ -1,17 +1,18 @@
 from celery import shared_task
+from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.utils import timezone
 
 from events.models import Registration, Event
-from users.models import CustomUser
+from users.models import User
 
 
 @shared_task
 def send_notification(user_id, event_id, message):
-    user = CustomUser.objects.get(id=user_id)
+    user = User.objects.get(id=user_id)
     event = Event.objects.get(id=event_id)
     send_mail(
-        'Notificação de Evento',
+        'Atualização de Evento',
         message,
         'noreply@eventmanagement.com',
         [user.email],
@@ -44,3 +45,16 @@ def notify_one_day_before_event():
                 event_id=event.id,
                 message=f"Alerta: O evento '{event.title}' acontecerá amanhã."
             )
+
+
+@shared_task
+def send_confirmation_email(user_id, event_id):
+    user = User.objects.get(id=user_id)
+    event = Event.objects.get(id=event_id)
+    confirmation_url = f"http://localhost:8000/api/events/{event_id}/confirm_registration/"
+    send_mail(
+        'Confirmação de Inscrição',
+        f'Clique no link para confirmar sua inscrição: {confirmation_url}',
+        'noreply@eventmanagement.com',
+        [user.email],
+    )

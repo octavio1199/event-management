@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'users.apps.UsersConfig',
     'events.apps.EventsConfig',
     'notifications.apps.NotificationsConfig',
@@ -94,7 +95,7 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
-AUTH_USER_MODEL = 'users.CustomUser'
+AUTH_USER_MODEL = 'users.User'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -164,3 +165,11 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 CELERY_TIMEZONE = 'UTC'
+
+# Email Configs
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_HOST =
+# EMAIL_PORT =
+# EMAIL_USE_TLS =
+# EMAIL_HOST_USER =
+# EMAIL_HOST_PASSWORD =

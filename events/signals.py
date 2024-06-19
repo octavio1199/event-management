@@ -17,10 +17,11 @@ def send_update_notification(sender, instance, created, **kwargs):
             send_notification.delay(notification.id)
 
 
-@receiver(post_delete, sender=Event)
+@receiver(post_save, sender=Event)
 def send_cancellation_notification(sender, instance, **kwargs):
-    participants = instance.participants.all()
-    for participant in participants:
-        message = f'O evento "{instance.title}" foi cancelado.'
-        notification = Notification.objects.create(event=instance, user=participant, message=message)
-        send_notification.delay(notification.id)
+    if not instance.is_active:
+        participants = instance.participants.all()
+        for participant in participants:
+            message = f'O evento "{instance.title}" foi cancelado.'
+            notification = Notification.objects.create(event=instance, user=participant, message=message)
+            send_notification.delay(notification.id)
