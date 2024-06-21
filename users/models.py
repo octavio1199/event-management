@@ -1,19 +1,37 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.db import models
 
 
-class User(AbstractUser):
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
-    email = models.EmailField(unique=True)
-    password = models.CharField(max_length=100)
-    profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+class CustomUserManager(BaseUserManager):
+    """
+    Used for updating default create user behaviour
+    """
+    def create_user(self, email, password, **kwargs):
+        # implement create user logic
+        user = self.model(email=email, **kwargs)
+        user.set_password(password)
+        user.save()
+        return user
 
-    def perform_destroy(self, instance):
-        instance.is_active = False
-        instance.save()
+    def create_superuser(self, phone_no, password, **kwargs):
+        # creates superuser.
+        self.create_user(phone_no, password)
+
+
+class CustomUser(AbstractUser):
+    username = None
+    email = models.EmailField(unique=True)
+    profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
     def __str__(self):
         return self.email
+
+    def perform_destroy(self):
+        self.is_active = False
+        self.save()

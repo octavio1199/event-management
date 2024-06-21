@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 from celery.schedules import crontab
@@ -87,15 +87,23 @@ WSGI_APPLICATION = 'EventManager.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'db' / 'db.sqlite3',
     }
+    # 'default': {
+    #         'ENGINE': 'django.db.backends.postgresql',
+    #         'NAME': 'postgres',
+    #         'USER': 'postgres',
+    #         'PASSWORD': 'postgres',
+    #         'HOST': 'db',
+    #         'PORT': '5432',
+    # }
 }
 
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'users.CustomUser'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -126,8 +134,9 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+MEDIA_ROOT = BASE_DIR / 'media_root'
+MEDIA_URL = '/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -137,16 +146,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Rest Framework Configs
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
 }
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+]
+
 # Celery Configs
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
@@ -167,9 +181,10 @@ CELERY_BEAT_SCHEDULE = {
 CELERY_TIMEZONE = 'UTC'
 
 # Email Configs
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# EMAIL_HOST =
-# EMAIL_PORT =
-# EMAIL_USE_TLS =
-# EMAIL_HOST_USER =
-# EMAIL_HOST_PASSWORD =
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'event.management.957@gmail.com'
+EMAIL_HOST_PASSWORD = 'geoh jppx hydd stmc'
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False

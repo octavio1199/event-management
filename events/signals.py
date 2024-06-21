@@ -1,9 +1,7 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from django.core.mail import send_mail
 
 from .models import Event, Registration
-from notifications.models import Notification
 from notifications.tasks import send_notification
 
 
@@ -13,8 +11,7 @@ def send_update_notification(sender, instance, created, **kwargs):
         participants = instance.participants.all()
         for participant in participants:
             message = f'O evento "{instance.title}" foi atualizado. Nova data: {instance.date}, nova hora: {instance.time}.'
-            notification = Notification.objects.create(event=instance, user=participant, message=message)
-            send_notification.delay(notification.id)
+            send_notification.delay(user_id=participant.id, event_id=instance.id, message=message)
 
 
 @receiver(post_save, sender=Event)
@@ -23,5 +20,11 @@ def send_cancellation_notification(sender, instance, **kwargs):
         participants = instance.participants.all()
         for participant in participants:
             message = f'O evento "{instance.title}" foi cancelado.'
-            notification = Notification.objects.create(event=instance, user=participant, message=message)
-            send_notification.delay(notification.id)
+            send_notification.delay(user_id=participant.id, event_id=instance.id, message=message)
+
+
+@receiver(post_save, sender=Registration)
+def send_confirmation_notification(sender, instance, created, **kwargs):
+    if created:
+        message = f'Confirmação de inscrição para o evento "{instance.event.title}".'
+        send_notification.delay(user_id=instance.participant.id, event_id=instance.event.id, message=message)

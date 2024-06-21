@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 
-from users.models import User
+from users.models import CustomUser
 
 
 class ActiveEventsManager(models.Manager):
@@ -16,12 +16,8 @@ class Event(models.Model):
     time = models.TimeField()
     location = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
-    organizer = models.ForeignKey(User, on_delete=models.CASCADE)
-    participants = models.ManyToManyField(User, through='Registration', related_name='events')
-
-    def deactivate(self, *args, **kwargs):
-        self.is_active = False
-        self.save()
+    organizer = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    participants = models.ManyToManyField(CustomUser, through='Registration', related_name='events')
 
     def __str__(self):
         return self.title
@@ -29,14 +25,14 @@ class Event(models.Model):
 
 class Registration(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    participant = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     registered_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
     confirmed = models.BooleanField(default=False)
     confirmed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        unique_together = ('event', 'user')
+        unique_together = ('event', 'participant')
 
     def __str__(self):
-        return f'{self.user.username} - {self.event.title}'
+        return f'{self.participant.username} - {self.event.title}'
